@@ -2,8 +2,8 @@
   <button class="e-btn e-primary" @click="handleSave">Save</button>
 
   <RichTextEditorComponent 
-    height="75vh" 
-    width="90vw" 
+    height="400px" 
+    width="1000px" 
     ref="rteInstance" 
     :toolbarSettings="customtoolbarSettings"
     :floatingToolbarOffset="50"
@@ -81,15 +81,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, provide, onMounted } from 'vue';
-import { RichTextEditorComponent, Toolbar, Image, HtmlEditor, Link, Table, QuickToolbar, NodeSelection } from '@syncfusion/ej2-vue-richtexteditor';
+import { ref, reactive, provide } from 'vue';
+import { RichTextEditorComponent, Toolbar, Image, HtmlEditor, Link, Table, QuickToolbar } from '@syncfusion/ej2-vue-richtexteditor';
 import { DialogComponent } from "@syncfusion/ej2-vue-popups";
 
 const rteInstance = ref(null);
 const dialogObj = ref(null);
-const selection = new NodeSelection(); // Así se maneja la selección
 
-// Estado reactivo para configuraciones de diálogo
+// Reactive state for dialog settings
 const dialogSettings = reactive({
   header: "Select the Special Character",
   showCloseIcon: true,
@@ -97,28 +96,24 @@ const dialogSettings = reactive({
   modal: true,
 });
 
-// Declarar las funciones antes de usarlas en reactive o en cualquier otra parte
-function openSymbolDialog() {
-  console.log("openSymbolDialog called");
+const customModalSymbol = () => {
   if (rteInstance.value && dialogObj.value) {
+    // Enfoca el panel de edición.
     const editor = rteInstance.value.ej2Instances.contentModule.getEditPanel();
     editor.focus();
-    const range = selection.getRange(document);
-    const savedSelection = selection.save(range, document);
+
+    const range = rteInstance.value.ej2Instances.selection.getRange(document);
+    const savedSelection = rteInstance.value.ej2Instances.selection.save(range, document);
+    
+    // Guarda la selección en alguna propiedad reactiva si necesitas acceder a ella más tarde.
     rteInstance.value.savedSelection = savedSelection;
+
+    // Muestra el diálogo
     dialogSettings.visible = true;
   }
-}
+};
 
-function onInsert() {
-  const activeChar = dialogObj.value.$el.querySelector(".char_block.e-active");
-  if (activeChar) {
-    rteInstance.value.ej2Instances.executeCommand('insertText', activeChar.textContent);
-    dialogSettings.visible = false; // Cierra el diálogo
-  }
-}
-
-const customtoolbarSettings = reactive({
+const customtoolbarSettings = {
   items: [
     'Bold', 'Italic', 'Underline', 'StrikeThrough',
     'FontName', 'FontSize', 'FontColor', 'BackgroundColor',
@@ -128,16 +123,19 @@ const customtoolbarSettings = reactive({
     'CreateLink', 'Image', '|', 'ClearFormat', 'Print',
     'SourceCode', 'FullScreen', '|', 'Undo', 'Redo',
     {
+      template: '<button id="custom_tool" class="e-tbar-btn e-control e-btn e-lib e-icon-btn">' +
+                '<span class="e-tbar-btn-text">&#937;</span></button>',
       tooltipText: "Insert Symbol",
-      template: '<button id="custom_tool" class="e-tbar-btn e-control e-btn e-lib e-icon-btn" @click="openSymbolDialog"><span class="e-tbar-btn-text">&#937;</span></button>',
-      click:openSymbolDialog,
+      click: customModalSymbol
     }
   ],
+  type: 'MultiRow',
   quickToolbarSettings: {
     image: ['Replace', 'Align', 'Caption', 'Remove', 'InsertLink', 'OpenImageLink', '|', 
             'EditImageLink', 'RemoveImageLink', 'Display', 'AltText', 'Dimension']
   }
-});
+};
+
 
 const handleSave = () => {
   if (rteInstance.value) {
@@ -147,6 +145,7 @@ const handleSave = () => {
 };
 
 provide('richtexteditor', [Toolbar, Image, HtmlEditor, Link, Table, QuickToolbar]);
+
 </script>
 
 <style>
