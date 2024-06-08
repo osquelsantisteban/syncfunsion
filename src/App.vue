@@ -150,16 +150,6 @@ const handleSave = () => {
 provide('richtexteditor', [Toolbar, Image, HtmlEditor, Link, Table, QuickToolbar]);
 
 
-const openSymbolDialog = () => {
-  console.log("openSymbolDialog called");
-  dialogSettings.visible = true; // Asegura que el modal se muestre
-};
-
-const closeSymbolDialog = () => {
-  console.log("closeSymbolDialog called");
-
-  dialogSettings.visible = false; // Cierra el modal
-};
 
 </script>
 
